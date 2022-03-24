@@ -18,7 +18,7 @@ config_setting(
 # NOTE: If a target depends on this, that target **must** cargo cult the linkopts
 # from `rubyfmt_test`! Otherwise, it will not compile+link properly.
 cc_library(
-    name = "rubyfmt",
+    name = "librubyfmt",
     srcs = select({
         ":enable_rubyfmt": ["rubyfmt.cc"],
         "//conditions:default": ["rubyfmt-noop.cc"],
@@ -65,7 +65,7 @@ cc_test(
     }),
     visibility = ["//tools:__pkg__"],
     deps = [
-        "//experimental/rubyfmt",
+        "//experimental/librubyfmt",
         "@doctest",
         "@doctest//:doctest_main",
     ],

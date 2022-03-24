@@ -69,7 +69,7 @@ cc_library(
         "//core",
         "//core/proto",
         "//core/serialize",
-        "//experimental/rubyfmt",
+        "//experimental/librubyfmt",
         "//hashing",
         "//main/cache",
         "//main/options",
