@@ -5,10 +5,32 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+ast::ExpressionPtr NextMethodFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+    this->ownerContainsQueryLoc.emplace_back(core::Loc(ctx.file, classDef.loc).contains(this->queryLoc));
+
+    return tree;
+}
+
+ast::ExpressionPtr NextMethodFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    this->ownerContainsQueryLoc.pop_back();
+
+    return tree;
+}
+
 ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
     ENFORCE(methodDef.symbol.exists());
     ENFORCE(methodDef.symbol != core::Symbols::todoMethod());
+
+    ENFORCE(!this->ownerContainsQueryLoc.empty());
+
+    if (!ownerContainsQueryLoc.back()) {
+        // The queryLoc is not contained within our enclosing ClassDef, which means that this method
+        // is in an entirely incorrect nesting scope.
+        return tree;
+    }
 
     auto currentMethod = methodDef.symbol;
 
